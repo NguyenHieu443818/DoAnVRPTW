@@ -1,0 +1,14 @@
+streamlit
+pandas
+numpy
+folium
+requests
+plotly
+matplotlib
+ortools
+streamlit-folium
+streamlit-extras
+fastapi
+uvicorn
+pydantic
+python-multipart
