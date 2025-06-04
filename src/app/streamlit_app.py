@@ -20,8 +20,8 @@ defaults = {
     'vrptw_solution': None,
     'next_id': 1,
     'search_results': [],
-    'selected_row_index': None, # <<< THÊM MỚI: Để theo dõi hàng được chọn
-    'last_map_click_for_update': None # <<< THÊM MỚI: Để xử lý cập nhật từ bản đồ
+    'selected_row_index': None, 
+    'last_map_click_for_update': None 
 }
 for key, value in defaults.items():
     if key not in st.session_state:
@@ -35,11 +35,9 @@ class VRPTWSolution:
         self.num_vehicles_used = num_vehicles_used
         self.is_feasible = is_feasible
 
-# --- Utility functions (Frontend specific or calling backend) ---
-# ... (các hàm search_location_api, calculate_matrices_api, get_route_geometry_api, solve_vrptw_api, parse_excel_api giữ nguyên) ...
 def search_location_api(query):
     try:
-        response = requests.get(f"{BACKEND_URL}/search_location/", params={'q': query}, timeout=10)
+        response = requests.get(f"{BACKEND_URL}/search_location/", params={'query': query}, timeout=10)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -186,29 +184,6 @@ with col1:
     # ... (Phần Import/Export Excel giữ nguyên) ...
     st.subheader("Import/Export Excel")
 
-    if st.button("Tạo file mẫu Excel", use_container_width=True):
-        sample_data = pd.DataFrame({
-            'Tên địa điểm': ['Kho chính', 'Siêu thị A', 'Cửa hàng B', 'Khách hàng C'],
-            'Vĩ độ': [21.0285, 21.0345, 21.0195, 21.0405],
-            'Kinh độ': [105.8542, 105.8602, 105.8482, 105.8662],
-            'Nhu cầu': [0, 15, 20, 10],
-            'Giờ mở': ['00:00', '08:00', '09:00', '08:30'],
-            'Giờ đóng': ['23:59', '17:00', '18:00', '16:30'],
-            'Thời gian phục vụ': [0, 15, 20, 10],
-            'Mô tả': ['', 'Giao hàng cho siêu thị', 'Giao hàng cho cửa hàng', 'Giao hàng cá nhân'],
-            'Loại': ['Kho', 'Khách hàng', 'Khách hàng', 'Khách hàng']
-        })
-        buffer = io.BytesIO()
-        sample_data.to_excel(buffer, sheet_name='Khách hàng', index=False)
-        buffer.seek(0)
-        st.download_button(
-            label="💾 Tải xuống file mẫu",
-            data=buffer.getvalue(),
-            file_name="VRPTW_Excel_Template.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
-
     if not st.session_state.locations.empty:
         if st.button("Xuất dữ liệu hiện tại", use_container_width=True):
             export_data = st.session_state.locations.copy()
@@ -274,7 +249,6 @@ with col1:
                 del st.session_state[key]
             st.rerun()
 
-    # ... (Phần Thêm địa điểm qua tìm kiếm giữ nguyên) ...
     st.subheader("Thêm địa điểm")
     search_col1, search_col2 = st.columns([3, 1])
     with search_col1:
@@ -301,13 +275,13 @@ with col1:
             with col_depot:
                 if st.button("Kho", key=f"depot_{i}", use_container_width=True):
                     add_location(result=result, is_depot_param=True) # Không cập nhật, chỉ thêm mới
-                    # st.session_state.search_results = [] # Xóa sau khi thêm
-                    # st.rerun() # add_location đã có rerun
+                    st.session_state.search_results = [] # Xóa sau khi thêm
+                    st.rerun() # add_location đã có rerun
             with col_customer:
                 if st.button("KH", key=f"customer_{i}", use_container_width=True):
                     add_location(result=result, is_depot_param=False) # Không cập nhật, chỉ thêm mới
-                    # st.session_state.search_results = [] # Xóa sau khi thêm
-                    # st.rerun() # add_location đã có rerun
+                    st.session_state.search_results = [] # Xóa sau khi thêm
+                    st.rerun() # add_location đã có rerun
         if st.button(" Xóa kết quả tìm kiếm"):
             st.session_state.search_results = []
             st.rerun()
@@ -471,7 +445,6 @@ with col1:
     else:
         st.info("Chưa có địa điểm nào. Hãy tìm kiếm, tải file Excel hoặc click vào bản đồ để thêm.")
 
-    # ... (Phần Thuật toán VRPTW và Kết quả VRPTW giữ nguyên) ...
     st.subheader("Thuật toán VRPTW")
     depot_count = st.session_state.locations['is_depot'].sum() if not st.session_state.locations.empty else 0
     customer_count = len(st.session_state.locations) - depot_count
