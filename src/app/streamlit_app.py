@@ -8,7 +8,7 @@ import io
 
 # --- Config ---
 st.set_page_config(page_title="VRPTW Solver", page_icon="🚛", layout="wide")
-st.title("VRPTW Solver - Vehicle Routing Problem with Time Windows")
+st.title("VRPTW Solver - Định tuyến xe với ràng buộc thời gian")
 
 BACKEND_URL = "http://127.0.0.1:8000"
 
@@ -182,7 +182,7 @@ col1, col2 = st.columns([1, 1])
 
 with col1:
     # ... (Phần Import/Export Excel giữ nguyên) ...
-    st.subheader("Import/Export Excel")
+    st.subheader("Nhập/Xuất Excel")
 
     if not st.session_state.locations.empty:
         if st.button("Xuất dữ liệu hiện tại", use_container_width=True):
@@ -240,9 +240,9 @@ with col1:
                 st.session_state[file_key] = "error"
         else:
             if st.session_state[file_key] == "success":
-                st.success(f"File đã được import thành công trước đó!")
+                st.success(f"File đã được import thành công!")
             elif st.session_state[file_key] == "error":
-                st.error(" File này đã có lỗi khi xử lý trước đó.")
+                st.error(" File này đã có lỗi khi xử lý.")
         if st.button("🔄 Tải file mới", help="Click để có thể tải file khác"):
             keys_to_remove = [key for key in st.session_state.keys() if key.startswith("processed_file_")]
             for key in keys_to_remove:
@@ -273,10 +273,14 @@ with col1:
             with col_info:
                 st.write(f"{result['name'][:60]}...")
             with col_depot:
-                if st.button("Kho", key=f"depot_{i}", use_container_width=True):
-                    add_location(result=result, is_depot_param=True) # Không cập nhật, chỉ thêm mới
-                    st.session_state.search_results = [] # Xóa sau khi thêm
-                    st.rerun() # add_location đã có rerun
+                    
+                has_depot = (not st.session_state.locations.empty and
+                 st.session_state.locations['is_depot'].any())
+
+                if st.button("Kho", key=f"depot_{i}", use_container_width=True, disabled=has_depot):
+                    add_location(result=result, is_depot_param=True)
+                    st.session_state.search_results = []
+                    st.rerun()
             with col_customer:
                 if st.button("KH", key=f"customer_{i}", use_container_width=True):
                     add_location(result=result, is_depot_param=False) # Không cập nhật, chỉ thêm mới
@@ -445,7 +449,7 @@ with col1:
     else:
         st.info("Chưa có địa điểm nào. Hãy tìm kiếm, tải file Excel hoặc click vào bản đồ để thêm.")
 
-    st.subheader("Thuật toán VRPTW")
+    st.subheader("Giải VRPTW")
     depot_count = st.session_state.locations['is_depot'].sum() if not st.session_state.locations.empty else 0
     customer_count = len(st.session_state.locations) - depot_count
 
